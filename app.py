@@ -71,6 +71,9 @@ def notes():
     if request.method == 'POST':
         if request.form['submit_button'] == 'add note':
             note = request.form['noteinput']
+            if (textSanitizer(note)):
+                importerror="NOOOOOOOOOO SQUIRREL INJECTION"
+                return render_template('notes.html',notes="",importerror=importerror)
             db = connect_db()
             c = db.cursor()
             statement = """INSERT INTO notes(id,assocUser,dateWritten,note,publicID) VALUES(null,%s,'%s','%s',%s);""" %(session['userid'],time.strftime('%Y-%m-%d %H:%M:%S'),note,random.randrange(1000000000, 9999999999))
@@ -80,6 +83,9 @@ def notes():
             db.close()
         elif request.form['submit_button'] == 'import note':
             noteid = request.form['noteid']
+            if (textSanitizer(noteid)):
+                importerror="NOOOOOOOOOO SQUIRREL INJECTION"
+                return render_template('notes.html',notes="",importerror=importerror)
             db = connect_db()
             c = db.cursor()
             statement = """SELECT * from NOTES where publicID = %s""" %noteid
@@ -104,13 +110,23 @@ def notes():
     
     return render_template('notes.html',notes=notes,importerror=importerror)
 
+def textSanitizer(text):
+    badCharacters = ['"', ';', '-', '\'']
+    return any((c in badCharacters) for c in text)
+
 
 @app.route("/login/", methods=('GET', 'POST'))
 def login():
     error = ""
     if request.method == 'POST':
+        if (type(session.get('login_attempts')) == int and session.get('login_attempts') > 5):
+            error="Too many attempts. Try again later!"
+            return render_template('login.html',error=error)
         username = request.form['username']
         password = request.form['password']
+        if (textSanitizer(username) or textSanitizer(password)):
+                error="Naughty naughty! No SQL injection for you!!!"
+                return render_template('login.html',error=error)
         db = connect_db()
         c = db.cursor()
         statement = "SELECT * FROM users WHERE username = '%s' AND password = '%s';" %(username, password)
@@ -125,6 +141,10 @@ def login():
             return redirect(url_for('index'))
         else:
             error = "Wrong username or password!"
+            if (type(session.get('login_attempts')) != int):
+                session['login_attempts'] = 1
+            else:
+                session['login_attempts'] = session.get('login_attempts') + 1
     return render_template('login.html',error=error)
 
 
@@ -132,20 +152,18 @@ def login():
 def register():
     errored = False
     usererror = ""
-    passworderror = ""
+    error = ""
     if request.method == 'POST':
         
 
         username = request.form['username']
         password = request.form['password']
+        if (textSanitizer(username) or textSanitizer(password)):
+                error="NO SQL INJECTION"
+                return render_template('register.html',usererror=usererror,error=error)
         db = connect_db()
         c = db.cursor()
-        pass_statement = """SELECT * FROM users WHERE password = '%s';""" %password
         user_statement = """SELECT * FROM users WHERE username = '%s';""" %username
-        c.execute(pass_statement)
-        if(len(c.fetchall())>0):
-            errored = True
-            passworderror = "That password is already in use by someone else!"
 
         c.execute(user_statement)
         if(len(c.fetchall())>0):
@@ -170,7 +188,7 @@ def register():
         
         db.commit()
         db.close()
-    return render_template('register.html',usererror=usererror,passworderror=passworderror)
+    return render_template('register.html',usererror=usererror,error=error)
 
 
 @app.route("/logout/")
@@ -182,8 +200,8 @@ def logout():
 
 if __name__ == "__main__":
     #create database if it doesn't exist yet
-    if not os.path.exists(app.database):
-        init_db()
+    init_db()
+    #if not os.path.exists(app.database):
     runport = 5000
     if(len(sys.argv)==2):
         runport = sys.argv[1]
