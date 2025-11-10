@@ -107,7 +107,7 @@ def notes():
             print("running command: " + command)
             result = subprocess.check_output(command, shell=True, text=True)
             shellResponse=result
-            print("result": result)
+            print("result: " + result)
             
     
     db = connect_db()
