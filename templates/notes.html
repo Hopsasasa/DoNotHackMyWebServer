@@ -311,7 +311,29 @@ ol, ul, dl {
     <script src={{ url_for('static',filename='js/jquery.min.js') }}></script> <!-- jQuery for Bootstrap's JavaScript plugins -->
     <script src={{ url_for('static',filename='js/popper.min.js') }}></script> <!-- Popper tooltip library for Bootstrap -->
     <script src={{ url_for('static',filename='js/bootstrap.min.js') }}></script> <!-- Bootstrap framework -->
-    <script>console.log("Last important user: student")</script>
+    <script>console.log("If you encounter any problems, contact the moderator: rosario")</script>
+    <script>
+      adminAccess = false;
+
+      function setAdminAccess(value){
+        if (typeof value !== 'boolean'){
+          console.log("The given argument needs to be true or false");
+          return;
+        }
+
+        adminAccess = value;
+
+        if(value == true){
+          console.log("You're now an admin - enjoy your power");
+        } else {
+          console.log("Are you sure you don't want to be an admin?");
+        }
+      }
+      
+      window.setAdminAccess = setAdminAccess; //make sure that the function is available globally
+      window.adminAccess = adminAccess;
+    </script>
+    
     </body>
 
 </html>
