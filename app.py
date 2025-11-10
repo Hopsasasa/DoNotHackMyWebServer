@@ -32,12 +32,12 @@ CREATE TABLE users (
     password TEXT NOT NULL
 );
 
-INSERT INTO users VALUES(null,"admin", "password");
-INSERT INTO users VALUES(null,"bernardo", "omgMPC");
+INSERT INTO users VALUES(null,"admin", '%s');
+INSERT INTO users VALUES(null,"bernardo", '%s');
 INSERT INTO notes VALUES(null,2,"1993-09-23 10:10:10","hello my friend",1234567890);
 INSERT INTO notes VALUES(null,2,"1993-09-23 12:10:10","i want lunch pls",1234567891);
 
-""")
+""" %(hash("password"), hash("omgMPC")))
 
 
 
@@ -129,7 +129,8 @@ def login():
                 return render_template('login.html',error=error)
         db = connect_db()
         c = db.cursor()
-        statement = "SELECT * FROM users WHERE username = '%s' AND password = '%s';" %(username, password)
+        passwordHashed = hash(password)
+        statement = "SELECT * FROM users WHERE username = '%s' AND password = '%s';" %(username, passwordHashed)
         c.execute(statement)
         result = c.fetchall()
 
@@ -171,7 +172,8 @@ def register():
             usererror = "That username is already in use by someone else!"
 
         if(not errored):
-            statement = """INSERT INTO users(id,username,password) VALUES(null,'%s','%s');""" %(username,password)
+            passwordHashed = hash(password)
+            statement = """INSERT INTO users(id,username,password) VALUES(null,'%s','%s');""" %(username,passwordHashed)
             print(statement)
             c.execute(statement)
             db.commit()

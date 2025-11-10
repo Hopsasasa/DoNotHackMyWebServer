@@ -8,6 +8,6 @@ This project is about learning to hack stuuff and tings.
     - Login page
     - Register page
     - Notes page
-- Brute force password
+- Brute force password per session
 - Weird matching of passwords
 - Passwords in plaintext
