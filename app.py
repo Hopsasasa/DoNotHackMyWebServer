@@ -1,5 +1,6 @@
 import json, sqlite3, click, functools, os, hashlib,time, random, sys
 from flask import Flask, current_app, g, session, redirect, render_template, url_for, request
+from werkzeug import security
 
 
 
@@ -37,7 +38,7 @@ INSERT INTO users VALUES(null,"bernardo", '%s');
 INSERT INTO notes VALUES(null,2,"1993-09-23 10:10:10","hello my friend",1234567890);
 INSERT INTO notes VALUES(null,2,"1993-09-23 12:10:10","i want lunch pls",1234567891);
 
-""" %(hash("password"), hash("omgMPC")))
+""" %(security.generate_password_hash("password"), security.generate_password_hash("omgMPC")))
 
 
 
@@ -129,12 +130,12 @@ def login():
                 return render_template('login.html',error=error)
         db = connect_db()
         c = db.cursor()
-        passwordHashed = hash(password)
-        statement = "SELECT * FROM users WHERE username = '%s' AND password = '%s';" %(username, passwordHashed)
+        statement = "SELECT * FROM users WHERE username = '%s';" %(username)
         c.execute(statement)
         result = c.fetchall()
+        check = security.check_password_hash(result[0][2], password)
 
-        if len(result) > 0:
+        if check:
             session.clear()
             session['logged_in'] = True
             session['userid'] = result[0][0]
@@ -172,7 +173,7 @@ def register():
             usererror = "That username is already in use by someone else!"
 
         if(not errored):
-            passwordHashed = hash(password)
+            passwordHashed = security.generate_password_hash(password)
             statement = """INSERT INTO users(id,username,password) VALUES(null,'%s','%s');""" %(username,passwordHashed)
             print(statement)
             c.execute(statement)
