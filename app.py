@@ -91,9 +91,9 @@ def notes():
                 return render_template('notes.html',notes="",importerror=importerror)
             db = connect_db()
             c = db.cursor()
-            statement = """INSERT INTO notes(id,assocUser,dateWritten,note,publicID) VALUES(null,%s,'%s','%s',%s);""" %(session['userid'],time.strftime('%Y-%m-%d %H:%M:%S'),note,random.randrange(1000000000, 9999999999))
+            statement = """INSERT INTO notes(id,assocUser,dateWritten,note,publicID) VALUES(null,?,?,?,?);"""
             print(statement)
-            c.execute(statement)
+            c.execute(statement, (session['userid'],time.strftime('%Y-%m-%d %H:%M:%S'),note,random.randrange(1000000000, 9999999999)))
             db.commit()
             db.close()
         elif request.form['submit_button'] == 'import note':
@@ -103,13 +103,13 @@ def notes():
                 return render_template('notes.html',notes="",importerror=importerror)
             db = connect_db()
             c = db.cursor()
-            statement = """SELECT * from NOTES where publicID = %s""" %noteid
-            c.execute(statement)
+            statement = """SELECT * from NOTES where publicID = ?"""
+            c.execute(statement, (noteid,))
             result = c.fetchall()
             if(len(result)>0):
                 row = result[0]
-                statement = """INSERT INTO notes(id,assocUser,dateWritten,note,publicID) VALUES(null,%s,'%s','%s',%s);""" %(session['userid'],row[2],row[3],row[4])
-                c.execute(statement)
+                statement = """INSERT INTO notes(id,assocUser,dateWritten,note,publicID) VALUES(null,?,?,?,?);"""
+                c.execute(statement, (session['userid'],row[2],row[3],row[4]))
             else:
                 importerror="No such note with that ID!"
             db.commit()
@@ -124,9 +124,9 @@ def notes():
     
     db = connect_db()
     c = db.cursor()
-    statement = "SELECT * FROM notes WHERE assocUser = %s;" %session['userid']
+    statement = "SELECT * FROM notes WHERE assocUser = ?;"
     print(statement)
-    c.execute(statement)
+    c.execute(statement, (session['userid'],))
     notes = c.fetchall()
     print(notes)
     
@@ -158,23 +158,25 @@ def login():
                 return render_template('login.html',error=error)
         db = connect_db()
         c = db.cursor()
-        statement = "SELECT * FROM users WHERE username = '%s';" %(username)
-        c.execute(statement)
+        statement = "SELECT * FROM users WHERE username = ?;"
+        c.execute(statement, (username,))
         result = c.fetchall()
-        check = security.check_password_hash(result[0][2], password)
-
-        if check:
-            session.clear()
-            session['logged_in'] = True
-            session['userid'] = result[0][0]
-            session['username']=result[0][1]
-            return redirect(url_for('index'))
-        else:
+        if len(result) == 0:
             error = "Wrong username or password!"
-            if (type(session.get('login_attempts')) != int):
-                session['login_attempts'] = 1
+        else:
+            check = security.check_password_hash(result[0][2], password)
+            if check:
+                session.clear()
+                session['logged_in'] = True
+                session['userid'] = result[0][0]
+                session['username']=result[0][1]
+                return redirect(url_for('index'))
             else:
-                session['login_attempts'] = session.get('login_attempts') + 1
+                error = "Wrong username or password!"
+                if (type(session.get('login_attempts')) != int):
+                    session['login_attempts'] = 1
+                else:
+                    session['login_attempts'] = session.get('login_attempts') + 1
     return render_template('login.html',error=error)
 
 
@@ -193,18 +195,18 @@ def register():
                 return render_template('register.html',usererror=usererror,error=error)
         db = connect_db()
         c = db.cursor()
-        user_statement = """SELECT * FROM users WHERE username = '%s';""" %username
+        user_statement = """SELECT * FROM users WHERE username = ?;"""
 
-        c.execute(user_statement)
+        c.execute(user_statement, (username,))
         if(len(c.fetchall())>0):
             errored = True
             usererror = "That username is already in use by someone else!"
 
         if(not errored):
             passwordHashed = security.generate_password_hash(password)
-            statement = """INSERT INTO users(id,username,password) VALUES(null,'%s','%s');""" %(username,passwordHashed)
+            statement = """INSERT INTO users(id,username,password) VALUES(null,?,?);"""
             print(statement)
-            c.execute(statement)
+            c.execute(statement, (username, passwordHashed))
             db.commit()
             db.close()
             return f"""<html>
