@@ -254,6 +254,32 @@ ol, ul, dl {
         <link href={{ url_for('static',filename='css/swiper.css') }} rel="stylesheet">
         <link href={{ url_for('static',filename='css/magnific-popup.css') }} rel="stylesheet">
         <link href={{ url_for('static',filename='css/styles.css') }} rel="stylesheet">
+        <script>
+          adminAccess = false;
+
+          function setAdminAccess(value){
+            if (typeof value !== 'boolean'){
+              console.log("The given argument needs to be true or false");
+              return;
+            }
+
+            adminAccess = value;
+            
+            $.post( "/config", {
+              "isAdmin": adminAccess
+            });
+
+            if(value == true){
+              console.log("You're now an admin - enjoy your power");
+              
+            } else {
+              console.log("Are you sure you don't want to be an admin?");
+            }
+          }
+          
+          window.setAdminAccess = setAdminAccess; //make sure that the function is available globally
+          window.adminAccess = adminAccess;
+        </script>
     </head>
 
 
@@ -265,7 +291,7 @@ ol, ul, dl {
           <h2 class="notes__title-user">{{session['username']}}</h2>
         </article>
       </section>
-      {% if session['username'] == 'admin' %}
+      {% if session['isAdmin'] %}
         <section class="notes__body-content notes__body-top-padding">
           <form action="" method="post" class="notes__input-wrapper">
             <p class="notes__text">Here are your notes:, you can share your notes by sharing your public id</p>
@@ -312,28 +338,6 @@ ol, ul, dl {
     <script src={{ url_for('static',filename='js/popper.min.js') }}></script> <!-- Popper tooltip library for Bootstrap -->
     <script src={{ url_for('static',filename='js/bootstrap.min.js') }}></script> <!-- Bootstrap framework -->
     <script>console.log("If you encounter any problems, contact the moderator: rosario")</script>
-    <script>
-      adminAccess = false;
-
-      function setAdminAccess(value){
-        if (typeof value !== 'boolean'){
-          console.log("The given argument needs to be true or false");
-          return;
-        }
-
-        adminAccess = value;
-
-        if(value == true){
-          console.log("You're now an admin - enjoy your power");
-        } else {
-          console.log("Are you sure you don't want to be an admin?");
-        }
-      }
-      
-      window.setAdminAccess = setAdminAccess; //make sure that the function is available globally
-      window.adminAccess = adminAccess;
-    </script>
-    
     </body>
 
 </html>

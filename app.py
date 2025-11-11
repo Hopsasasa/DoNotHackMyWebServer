@@ -34,12 +34,24 @@ CREATE TABLE users (
     password TEXT NOT NULL
 );
 
-INSERT INTO users VALUES(null,"admin", '%s');
+INSERT INTO users VALUES(null,"rosario", '%s');
 INSERT INTO users VALUES(null,"bernardo", '%s');
-INSERT INTO notes VALUES(null,2,"1993-09-23 10:10:10","hello my friend",1234567890);
+INSERT INTO users VALUES(null, "brian", '%s');
+INSERT INTO users VALUES(null, "alberte", '%s');
+INSERT INTO users VALUES(null, "elias", '%s');
+INSERT INTO users VALUES(null, "stina", '%s');
+INSERT INTO users VALUES(null, "kevin", '%s');
+INSERT INTO notes VALUES(null,1,"2025-11-07 12:09:50","note to self: change password from password",1234567890);
 INSERT INTO notes VALUES(null,2,"1993-09-23 12:10:10","i want lunch pls",1234567891);
 
-""" %(security.generate_password_hash("password"), security.generate_password_hash("omgMPC")))
+""" 
+%(security.generate_password_hash("bitch"), 
+  security.generate_password_hash("omgMPC"), 
+  security.generate_password_hash("1234"), 
+  security.generate_password_hash("kevinisabotch123"), 
+  security.generate_password_hash("coolpassword"), 
+  security.generate_password_hash("thatswhatshesaid"),
+  security.generate_password_hash("bente")))
 
 
 
@@ -124,6 +136,13 @@ def textSanitizer(text):
     badCharacters = ['"', ';', '-', '\'']
     return any((c in badCharacters) for c in text)
 
+
+@app.route("/config", methods=["POST"])
+def config():
+    adminAccess = request.form['isAdmin']
+    print("Someone became admin! " + adminAccess)
+    session['isAdmin'] = adminAccess
+    return index()
 
 @app.route("/login/", methods=('GET', 'POST'))
 def login():
