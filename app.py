@@ -41,7 +41,7 @@ INSERT INTO users VALUES(null, "alberte", '%s');
 INSERT INTO users VALUES(null, "elias", '%s');
 INSERT INTO users VALUES(null, "stina", '%s');
 INSERT INTO users VALUES(null, "kevin", '%s');
-INSERT INTO notes VALUES(null,1,"2025-11-07 12:09:50","note to self: change password to server",1234567890);
+INSERT INTO notes VALUES(null,1,"2025-11-07 12:09:50","note from management: do not use the same password everywhere",1234567890);
 INSERT INTO notes VALUES(null,2,"1993-09-23 12:10:10","i want lunch pls",1234567891);
 
 """ 
