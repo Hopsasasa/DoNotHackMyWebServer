@@ -159,7 +159,7 @@ def login():
     return render_template('login.html',error=error)
 
 
-@app.route("/register/", methaods=('GET', 'POST'))
+@app.route("/register/", methods=('GET', 'POST'))
 def register():
     errored = False
     usererror = ""
